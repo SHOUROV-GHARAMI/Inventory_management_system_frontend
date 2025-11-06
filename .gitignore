@@ -1,144 +1,64 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# ===========================
-# Compiled output
-# ===========================
+# Angular Build Output
 /dist
 /tmp
 /out-tsc
 /.angular
 /bazel-out
 
-# ===========================
-# Node modules
-# ===========================
-/node_modules
-npm-debug.log
-yarn-error.log
+# Dependencies
+node_modules/
 
-# ===========================
-# IDEs and editors
-# ===========================
-.idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-.vscode/*
+# IDE - VSCode
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
+.history/
 
-# ===========================
+# IDE - JetBrains (WebStorm, IntelliJ)
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# IDE - Others
+*.sublime-workspace
+.c9/
+*.launch
+
 # AI Coding Assistants
-# ===========================
-# GitHub Copilot
 .copilot/
-*.copilot
-
-# Cursor IDE
 .cursor/
 .cursorrules
+.codeium/
+.tabnine/
+.supermaven/
+.aws-codewhisperer/
+.jetbrains-ai/
+*.copilot
 cursor.log
 
-# Codeium
-.codeium/
-
-# Tabnine
-.tabnine/
-
-# Amazon CodeWhisperer
-.aws-codewhisperer/
-
-# JetBrains AI Assistant
-.jetbrains-ai/
-
-# Supermaven
-.supermaven/
-
-# ===========================
 # System Files
-# ===========================
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# ===========================
-# Environment & Secrets
-# ===========================
-.env
-.env.local
-.env.*.local
-*.pem
-*.key
-*.cert
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Environment files with actual API keys/secrets
-# Keep environment.ts if it only has localhost URLs
-# Uncomment the line below if your environment.ts contains secrets:
-# /src/environments/environment.ts
-/src/environments/environment.prod.ts
-
-# ===========================
-# Testing
-# ===========================
-/coverage
-/.nyc_output
-*.log
-.karma/
-
-# ===========================
-# Miscellaneous
-# ===========================
-/.sass-cache
-/connect.lock
-/typings
 *.sw?
-*.bak
-*.tmp
-*.temp
 
-# ===========================
-# Build artifacts
-# ===========================
-*.tgz
-*.zip
-*.tar.gz
-*.rar
-
-# ===========================
-# OS generated files
-# ===========================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# ===========================
-# Logs
-# ===========================
-logs
+# Testing
+/coverage
+.karma/
 *.log
+
+# Environment files (if they contain secrets)
+# Uncomment if needed:
+# /src/environments/environment.ts
+# /src/environments/environment.prod.ts
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-
-# ===========================
-# Optional: Deployment files
-# ===========================
-# Uncomment if you don't want to commit these
-# .vercel
-# .netlify
-# .firebase
