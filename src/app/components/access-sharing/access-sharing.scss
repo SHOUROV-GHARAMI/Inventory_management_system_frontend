@@ -1,0 +1,49 @@
+.access-sharing-container {
+  .card {
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+
+    .card-header {
+      border-bottom: 2px solid var(--border-color);
+    }
+  }
+
+  .list-group-item {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+
+    &:hover {
+      background-color: var(--bg-secondary);
+    }
+  }
+
+  .table {
+    color: var(--text-primary);
+
+    th {
+      border-bottom-color: var(--border-color);
+    }
+
+    td {
+      border-top-color: var(--border-color);
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background-color: var(--bg-secondary);
+    }
+  }
+
+  .input-group {
+    .input-group-text {
+      background-color: var(--bg-secondary);
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+  }
+
+  .opacity-25 {
+    opacity: 0.25;
+  }
+}

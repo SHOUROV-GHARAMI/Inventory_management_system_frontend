@@ -1,0 +1,142 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="mb-3">
+        <i class="fas fa-tachometer-alt"></i> My Dashboard
+      </h1>
+      <p class="lead">Welcome back, {{ authService.currentUser()?.username }}!</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="spinner-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <!-- My Inventories -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2><i class="fas fa-box"></i> My Inventories</h2>
+          <button class="btn btn-primary" routerLink="/inventories/create">
+            <i class="fas fa-plus"></i> Create New
+          </button>
+        </div>
+        
+        @if (myInventories.length > 0) {
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Items</th>
+                    <th>Views</th>
+                    <th>Visibility</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (inv of myInventories; track inv.id) {
+                    <tr>
+                      <td>
+                        <a [routerLink]="['/inventories', inv.id]" class="fw-bold text-decoration-none">
+                          {{ inv.title }}
+                        </a>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary">{{ inv.category }}</span>
+                      </td>
+                      <td>{{ inv.itemCount }}</td>
+                      <td>{{ inv.viewCount }}</td>
+                      <td>
+                        @if (inv.isPublic) {
+                          <span class="badge bg-success">
+                            <i class="fas fa-globe"></i> Public
+                          </span>
+                        } @else {
+                          <span class="badge bg-warning">
+                            <i class="fas fa-lock"></i> Private
+                          </span>
+                        }
+                      </td>
+                      <td>{{ inv.updatedAt | date:'short' }}</td>
+                      <td>
+                        <a [routerLink]="['/inventories', inv.id]" class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        } @else {
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> You haven't created any inventories yet. 
+            <a routerLink="/inventories/create" class="alert-link">Create your first inventory!</a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Shared with Me -->
+    <div class="row">
+      <div class="col-12">
+        <h2 class="mb-3">
+          <i class="fas fa-share-alt"></i> Shared with Me
+        </h2>
+        
+        @if (sharedInventories.length > 0) {
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Owner</th>
+                    <th>Category</th>
+                    <th>Items</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (inv of sharedInventories; track inv.id) {
+                    <tr>
+                      <td>
+                        <a [routerLink]="['/inventories', inv.id]" class="fw-bold text-decoration-none">
+                          {{ inv.title }}
+                        </a>
+                      </td>
+                      <td>{{ inv.ownerUsername }}</td>
+                      <td>
+                        <span class="badge bg-secondary">{{ inv.category }}</span>
+                      </td>
+                      <td>{{ inv.itemCount }}</td>
+                      <td>{{ inv.updatedAt | date:'short' }}</td>
+                      <td>
+                        <a [routerLink]="['/inventories', inv.id]" class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        } @else {
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No inventories have been shared with you yet.
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,97 @@
+.custom-id-config-container {
+  .card {
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+
+    .card-header {
+      border-bottom: 2px solid var(--border-color);
+    }
+  }
+
+  .component-item {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color) !important;
+    transition: all 0.2s ease;
+    cursor: move;
+
+    &:hover {
+      background-color: var(--bg-secondary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+  }
+
+  .drag-handle {
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .preview-box {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .preview-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  .example-item {
+    padding: 4px 8px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+  }
+
+  .format-string {
+    padding: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+  }
+
+  .components-list {
+    min-height: 200px;
+  }
+
+  code {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .opacity-25 {
+    opacity: 0.25;
+  }
+
+  // Ensure proper styling in dark mode
+  .form-control,
+  .form-select {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+
+    &:focus {
+      background-color: var(--bg-primary);
+      border-color: var(--primary-color);
+      color: var(--text-primary);
+    }
+
+    &:disabled {
+      background-color: var(--bg-secondary);
+      opacity: 0.6;
+    }
+  }
+}

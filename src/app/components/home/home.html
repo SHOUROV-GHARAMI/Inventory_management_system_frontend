@@ -1,0 +1,123 @@
+<div class="container">
+  <!-- Hero Section -->
+  <div class="row mb-5">
+    <div class="col-12 text-center">
+      <h1 class="display-4 mb-3">
+        <i class="fas fa-boxes text-primary"></i> Inventory Management System
+      </h1>
+      <p class="lead">Create and manage custom inventories with ease</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="spinner-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <!-- Popular Inventories -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <h2 class="mb-4">
+          <i class="fas fa-fire text-danger"></i> Popular Inventories
+        </h2>
+        @if (popularInventories.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Owner</th>
+                  <th>Items</th>
+                  <th>Views</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of popularInventories; track inv.id) {
+                  <tr>
+                    <td>
+                      <a [routerLink]="['/inventories', inv.id]" class="text-decoration-none">
+                        {{ inv.title }}
+                      </a>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary">{{ inv.category }}</span>
+                    </td>
+                    <td>{{ inv.ownerUsername }}</td>
+                    <td>{{ inv.itemCount }}</td>
+                    <td>
+                      <i class="fas fa-eye"></i> {{ inv.viewCount }}
+                    </td>
+                    <td>
+                      <a [routerLink]="['/inventories', inv.id]" class="btn btn-sm btn-outline-primary">
+                        View <i class="fas fa-arrow-right"></i>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No popular inventories yet.
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Latest Inventories -->
+    <div class="row">
+      <div class="col-12">
+        <h2 class="mb-4">
+          <i class="fas fa-clock text-info"></i> Latest Inventories
+        </h2>
+        @if (latestInventories.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Owner</th>
+                  <th>Items</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of latestInventories; track inv.id) {
+                  <tr>
+                    <td>
+                      <a [routerLink]="['/inventories', inv.id]" class="text-decoration-none">
+                        {{ inv.title }}
+                      </a>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary">{{ inv.category }}</span>
+                    </td>
+                    <td>{{ inv.ownerUsername }}</td>
+                    <td>{{ inv.itemCount }}</td>
+                    <td>{{ inv.createdAt | date:'short' }}</td>
+                    <td>
+                      <a [routerLink]="['/inventories', inv.id]" class="btn btn-sm btn-outline-primary">
+                        View <i class="fas fa-arrow-right"></i>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No inventories available yet.
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

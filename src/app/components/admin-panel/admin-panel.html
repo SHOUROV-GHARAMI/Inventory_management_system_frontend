@@ -1,0 +1,205 @@
+<div class="container-fluid mt-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1><i class="fas fa-users-cog"></i> Admin Panel</h1>
+      <p class="lead">Manage users, roles, and permissions</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" (click)="error = ''"></button>
+    </div>
+  }
+
+  <!-- Search Bar -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by username or email..."
+          [(ngModel)]="searchQuery"
+          (input)="applyFilter()"
+        >
+      </div>
+    </div>
+    <div class="col-md-6 text-end">
+      <button class="btn btn-outline-secondary" (click)="loadUsers()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Users</h5>
+          <h2>{{ users.length }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Admins</h5>
+          <h2>{{ adminCount }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Blocked</h5>
+          <h2>{{ blockedCount }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Active</h5>
+          <h2>{{ activeCount }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading users...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Users Table -->
+  @if (!loading && filteredUsers.length > 0) {
+    <div class="card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredUsers; track user.id) {
+                <tr [class.table-warning]="isCurrentUser(user)">
+                  <td>
+                    <strong>{{ user.username }}</strong>
+                    @if (isCurrentUser(user)) {
+                      <span class="badge bg-info ms-2">You</span>
+                    }
+                  </td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    @if (user.isAdmin) {
+                      <span class="badge bg-danger">
+                        <i class="fas fa-shield-alt"></i> Admin
+                      </span>
+                    } @else {
+                      <span class="badge bg-secondary">
+                        <i class="fas fa-user"></i> User
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    @if (user.isBlocked) {
+                      <span class="badge bg-warning">
+                        <i class="fas fa-ban"></i> Blocked
+                      </span>
+                    } @else {
+                      <span class="badge bg-success">
+                        <i class="fas fa-check-circle"></i> Active
+                      </span>
+                    }
+                  </td>
+                  <td>{{ user.createdAt | date:'short' }}</td>
+                  <td>
+                    @if (!isCurrentUser(user)) {
+                      <div class="btn-group" role="group">
+                        <!-- Block/Unblock -->
+                        @if (user.isBlocked) {
+                          <button
+                            class="btn btn-sm btn-success"
+                            (click)="unblockUser(user)"
+                            title="Unblock user"
+                          >
+                            <i class="fas fa-check"></i>
+                          </button>
+                        } @else {
+                          <button
+                            class="btn btn-sm btn-warning"
+                            (click)="blockUser(user)"
+                            title="Block user"
+                          >
+                            <i class="fas fa-ban"></i>
+                          </button>
+                        }
+                        
+                        <!-- Grant/Revoke Admin -->
+                        @if (user.isAdmin) {
+                          <button
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="revokeAdmin(user)"
+                            title="Revoke admin"
+                          >
+                            <i class="fas fa-user-minus"></i>
+                          </button>
+                        } @else {
+                          <button
+                            class="btn btn-sm btn-outline-primary"
+                            (click)="grantAdmin(user)"
+                            title="Grant admin"
+                          >
+                            <i class="fas fa-user-plus"></i>
+                          </button>
+                        }
+                        
+                        <!-- Delete -->
+                        <button
+                          class="btn btn-sm btn-danger"
+                          (click)="deleteUser(user)"
+                          title="Delete user"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!loading && filteredUsers.length === 0 && searchQuery) {
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i> No users found matching "{{ searchQuery }}".
+    </div>
+  }
+
+  @if (!loading && users.length === 0) {
+    <div class="alert alert-secondary">
+      <i class="fas fa-users"></i> No users found.
+    </div>
+  }
+</div>

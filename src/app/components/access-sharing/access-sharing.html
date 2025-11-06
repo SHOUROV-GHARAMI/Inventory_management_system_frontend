@@ -1,0 +1,181 @@
+<div class="access-sharing-container p-4">
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  @if (!loading) {
+    <!-- Owner Only Notice -->
+    @if (!isOwner) {
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Only the owner can manage access to this inventory.
+      </div>
+    }
+
+    <!-- Add User Section -->
+    @if (isOwner) {
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-user-plus me-2"></i>
+            Share with Users
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Search users by username or email..."
+              [(ngModel)]="searchQuery"
+              (input)="searchUsers()"
+              [disabled]="!isOwner">
+            @if (searchQuery) {
+              <button class="btn btn-outline-secondary" type="button" (click)="clearSearch()">
+                <i class="fas fa-times"></i>
+              </button>
+            }
+          </div>
+
+          <!-- Search Results -->
+          @if (searching) {
+            <div class="text-center mt-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Searching...</span>
+              </div>
+              <span class="ms-2 text-muted">Searching...</span>
+            </div>
+          }
+
+          @if (searchResults.length > 0 && !searching) {
+            <div class="list-group mt-3">
+              @for (user of searchResults; track user.id) {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ user.username }}</strong>
+                    <br>
+                    <small class="text-muted">{{ user.email }}</small>
+                  </div>
+                  <button 
+                    class="btn btn-sm btn-primary" 
+                    (click)="grantAccess(user.id)"
+                    [disabled]="!isOwner">
+                    <i class="fas fa-plus me-1"></i>
+                    Grant Access
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          @if (searchQuery && searchResults.length === 0 && !searching) {
+            <div class="alert alert-info mt-3 mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              No users found matching "{{ searchQuery }}"
+            </div>
+          }
+
+          @if (!searchQuery) {
+            <div class="text-muted mt-3 small">
+              <i class="fas fa-lightbulb me-2"></i>
+              Type at least 2 characters to search for users
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Shared Users List -->
+    <div class="card">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">
+          <i class="fas fa-users me-2"></i>
+          Shared With
+          <span class="badge bg-secondary ms-2">{{ sharedUsers.length }}</span>
+        </h5>
+      </div>
+      <div class="card-body">
+        @if (sharedUsers.length === 0) {
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-users fa-3x mb-3 opacity-25"></i>
+            <p class="mb-0">This inventory is not shared with anyone yet.</p>
+            @if (isOwner) {
+              <p class="small">Use the search above to share with users.</p>
+            }
+          </div>
+        }
+
+        @if (sharedUsers.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Granted At</th>
+                  @if (isOwner) {
+                    <th class="text-end">Actions</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of sharedUsers; track user.userId) {
+                  <tr>
+                    <td>
+                      <i class="fas fa-user text-muted me-2"></i>
+                      <strong>{{ user.username }}</strong>
+                    </td>
+                    <td>
+                      <i class="fas fa-envelope text-muted me-2"></i>
+                      {{ user.email }}
+                    </td>
+                    <td>
+                      <i class="fas fa-calendar text-muted me-2"></i>
+                      {{ user.grantedAt | date:'short' }}
+                    </td>
+                    @if (isOwner) {
+                      <td class="text-end">
+                        <button 
+                          class="btn btn-sm btn-danger" 
+                          (click)="revokeAccess(user.userId, user.username)"
+                          title="Revoke access">
+                          <i class="fas fa-user-times me-1"></i>
+                          Revoke
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card mt-3 border-info">
+      <div class="card-body">
+        <h6 class="card-title">
+          <i class="fas fa-question-circle text-info me-2"></i>
+          About Access Control
+        </h6>
+        <ul class="mb-0 small">
+          <li>Users with access can view and edit the inventory</li>
+          <li>They can add, modify, and delete items</li>
+          <li>They can add custom fields and participate in discussions</li>
+          <li>Only the owner can share or revoke access</li>
+          <li>Making the inventory public allows everyone to view it</li>
+        </ul>
+      </div>
+    </div>
+  }
+</div>

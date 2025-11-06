@@ -1,0 +1,246 @@
+<div class="custom-fields-editor">
+  @if (error) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" (click)="error = ''"></button>
+    </div>
+  }
+
+  <!-- Instructions -->
+  <div class="alert alert-info mb-3">
+    <i class="fas fa-info-circle"></i> 
+    <strong>Custom Fields:</strong> Define up to 3 fields per type. Drag and drop to reorder. 
+    Fields marked "Show in Table" will appear in the items table.
+  </div>
+
+  <!-- Add Field Button -->
+  <div class="mb-3">
+    <button class="btn btn-success" (click)="openAddModal()">
+      <i class="fas fa-plus"></i> Add Custom Field
+    </button>
+  </div>
+
+  <!-- Type Limits Info -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="card-title">Field Type Limits</h6>
+      <div class="row">
+        @for (type of fieldTypes; track type) {
+          <div class="col-md-2 col-sm-4 col-6 mb-2">
+            <span class="badge" [class.bg-success]="getTypeCount(type) < 3" [class.bg-warning]="getTypeCount(type) === 3">
+              {{ type }}: {{ getTypeCount(type) }}/3
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading fields...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Fields List -->
+  @if (!loading && fields.length > 0) {
+    <div class="list-group">
+      @for (field of fields; track field.id) {
+        <div
+          class="list-group-item d-flex justify-content-between align-items-center"
+          draggable="true"
+          (dragstart)="onDragStart(field)"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, field)"
+          (dragend)="onDragEnd()"
+          [style.cursor]="'move'"
+        >
+          <div class="d-flex align-items-center flex-grow-1">
+            <i class="fas fa-grip-vertical text-muted me-3"></i>
+            <div>
+              <h6 class="mb-1">{{ field.name }}</h6>
+              <small class="text-muted">
+                <span class="badge bg-secondary me-2">{{ field.type }}</span>
+                @if (field.showInTable) {
+                  <span class="badge bg-info">
+                    <i class="fas fa-table"></i> Show in Table
+                  </span>
+                }
+              </small>
+            </div>
+          </div>
+          <div class="btn-group" role="group">
+            <button
+              class="btn btn-sm btn-outline-primary"
+              (click)="openEditModal(field)"
+              title="Edit field"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="deleteField(field)"
+              title="Delete field"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading && fields.length === 0) {
+    <div class="alert alert-secondary">
+      <i class="fas fa-layer-group"></i> No custom fields defined yet. Click "Add Custom Field" to get started!
+    </div>
+  }
+</div>
+
+<!-- Add Field Modal -->
+@if (showAddModal) {
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-plus"></i> Add Custom Field</h5>
+          <button type="button" class="btn-close" (click)="closeAddModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="fieldName" class="form-label">Field Name <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control"
+                id="fieldName"
+                [(ngModel)]="newFieldName"
+                name="fieldName"
+                placeholder="e.g., Serial Number"
+                required
+              >
+            </div>
+            <div class="mb-3">
+              <label for="fieldType" class="form-label">Field Type <span class="text-danger">*</span></label>
+              <select
+                class="form-select"
+                id="fieldType"
+                [(ngModel)]="newFieldType"
+                name="fieldType"
+                required
+              >
+                @for (type of fieldTypes; track type) {
+                  <option [value]="type" [disabled]="!canAddType(type)">
+                    {{ type }} ({{ getTypeCount(type) }}/3)
+                  </option>
+                }
+              </select>
+              <div class="form-text">
+                You can have up to 3 fields of each type.
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="showInTable"
+                  [(ngModel)]="newFieldShowInTable"
+                  name="showInTable"
+                >
+                <label class="form-check-label" for="showInTable">
+                  <i class="fas fa-table"></i> Show this field in the items table
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAddModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="addField()"
+            [disabled]="!newFieldName.trim() || !canAddType(newFieldType)"
+          >
+            <i class="fas fa-plus"></i> Add Field
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Field Modal -->
+@if (showEditModal && editingField) {
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Field: {{ editingField.name }}</h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="editFieldName" class="form-label">Field Name <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control"
+                id="editFieldName"
+                [(ngModel)]="editFieldName"
+                name="editFieldName"
+                required
+              >
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Field Type</label>
+              <input
+                type="text"
+                class="form-control"
+                [value]="editingField.type"
+                readonly
+                disabled
+              >
+              <div class="form-text">
+                Field type cannot be changed after creation.
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="editShowInTable"
+                  [(ngModel)]="editFieldShowInTable"
+                  name="editShowInTable"
+                >
+                <label class="form-check-label" for="editShowInTable">
+                  <i class="fas fa-table"></i> Show this field in the items table
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="updateField()"
+            [disabled]="!editFieldName.trim()"
+          >
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

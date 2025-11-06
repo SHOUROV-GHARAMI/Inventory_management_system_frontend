@@ -1,0 +1,183 @@
+<div class="statistics-container p-4">
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Loading statistics...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+  }
+
+  <!-- Statistics Content -->
+  @if (statistics && !loading) {
+    <!-- Overview Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-box fa-2x text-primary mb-2"></i>
+            <h3 class="mb-0">{{ statistics.totalItems }}</h3>
+            <p class="text-muted mb-0">Total Items</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+            <h3 class="mb-0">{{ statistics.totalLikes }}</h3>
+            <p class="text-muted mb-0">Total Likes</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-comments fa-2x text-info mb-2"></i>
+            <h3 class="mb-0">{{ statistics.totalComments }}</h3>
+            <p class="text-muted mb-0">Comments</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-eye fa-2x text-success mb-2"></i>
+            <h3 class="mb-0">{{ statistics.viewCount }}</h3>
+            <p class="text-muted mb-0">Views</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Field Statistics -->
+    @if (statistics.fieldStatistics.length > 0) {
+      <h4 class="mb-3">
+        <i class="fas fa-chart-bar me-2"></i>
+        Field Statistics
+      </h4>
+
+      <div class="row g-3">
+        @for (fieldStat of statistics.fieldStatistics; track fieldStat.fieldId) {
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">
+                  {{ fieldStat.fieldName }}
+                  <span class="badge bg-secondary ms-2">{{ fieldStat.fieldType }}</span>
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Data Completion -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Data Completion</span>
+                    <span class="fw-bold">{{ getFilledPercentage(fieldStat).toFixed(1) }}%</span>
+                  </div>
+                  <div class="progress" style="height: 20px;">
+                    <div class="progress-bar" 
+                         role="progressbar" 
+                         [style.width.%]="getFilledPercentage(fieldStat)"
+                         [attr.aria-valuenow]="getFilledPercentage(fieldStat)"
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between mt-1">
+                    <small class="text-muted">Filled: {{ fieldStat.filledCount }}</small>
+                    <small class="text-muted">Empty: {{ fieldStat.emptyCount }}</small>
+                  </div>
+                </div>
+
+                <!-- Numeric Statistics -->
+                @if (hasNumericStats(fieldStat)) {
+                  <div class="row g-2 mb-3">
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded">
+                        <div class="text-muted small">Average</div>
+                        <div class="fw-bold">{{ fieldStat.average?.toFixed(2) }}</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded">
+                        <div class="text-muted small">Sum</div>
+                        <div class="fw-bold">{{ fieldStat.sum?.toFixed(2) }}</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded">
+                        <div class="text-muted small">Min</div>
+                        <div class="fw-bold">{{ fieldStat.min?.toFixed(2) }}</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded">
+                        <div class="text-muted small">Max</div>
+                        <div class="fw-bold">{{ fieldStat.max?.toFixed(2) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Top Values (for text/boolean fields) -->
+                @if (hasTopValues(fieldStat)) {
+                  <div>
+                    <h6 class="text-muted mb-2">Most Common Values</h6>
+                    <ul class="list-group list-group-flush">
+                      @for (value of fieldStat.topValues; track $index) {
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                          <span>{{ value.value }}</span>
+                          <div>
+                            <span class="badge bg-primary me-2">{{ value.count }}</span>
+                            <span class="text-muted small">{{ value.percentage.toFixed(1) }}%</span>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                <!-- Empty State -->
+                @if (!hasNumericStats(fieldStat) && !hasTopValues(fieldStat)) {
+                  <div class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No values available for analysis
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- No Fields Message -->
+    @if (statistics.fieldStatistics.length === 0) {
+      <div class="alert alert-info mt-3">
+        <i class="fas fa-info-circle me-2"></i>
+        No custom fields defined for this inventory yet. Add custom fields to see detailed statistics.
+      </div>
+    }
+  }
+
+  <!-- Empty State (no statistics and no error) -->
+  @if (!statistics && !loading && !error) {
+    <div class="text-center py-5">
+      <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+      <h4 class="text-muted">No Statistics Available</h4>
+      <p class="text-muted">Add some items to see statistics</p>
+    </div>
+  }
+</div>

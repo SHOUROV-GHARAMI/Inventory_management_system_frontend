@@ -1,0 +1,237 @@
+<div class="items-table-container">
+  @if (error) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" (click)="error = ''"></button>
+    </div>
+  }
+
+  <!-- Add Item Button -->
+  @if (canEdit && fields.length > 0) {
+    <div class="mb-3">
+      <button class="btn btn-primary" (click)="openAddModal()">
+        <i class="fas fa-plus"></i> Add Item
+      </button>
+    </div>
+  }
+
+  @if (fields.length === 0 && !loading) {
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i> No custom fields defined. Please add custom fields before adding items.
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading items...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Items Table -->
+  @if (!loading && items.length > 0) {
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            @for (field of tableFields; track field.id) {
+              <th>{{ field.name }}</th>
+            }
+            <th>Likes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr>
+              <td><strong>{{ item.customId }}</strong></td>
+              @for (field of tableFields; track field.id) {
+                <td>
+                  @if (field.type === 'Link' && getFieldValue(item, field.id)) {
+                    <a [href]="getFieldValue(item, field.id)" target="_blank" class="text-decoration-none">
+                      <i class="fas fa-external-link-alt"></i> Link
+                    </a>
+                  } @else {
+                    {{ getFieldDisplayValue(item, field) }}
+                  }
+                </td>
+              }
+              <td>
+                @if (authService.isAuthenticated()) {
+                  <button
+                    class="btn btn-sm"
+                    [class.btn-danger]="item.isLikedByCurrentUser"
+                    [class.btn-outline-danger]="!item.isLikedByCurrentUser"
+                    (click)="toggleLike(item)"
+                    title="{{ item.isLikedByCurrentUser ? 'Unlike' : 'Like' }}"
+                  >
+                    <i class="fas fa-heart"></i> {{ item.likeCount }}
+                  </button>
+                } @else {
+                  <span class="badge bg-secondary">
+                    <i class="fas fa-heart"></i> {{ item.likeCount }}
+                  </span>
+                }
+              </td>
+              <td>
+                @if (canEdit) {
+                  <div class="btn-group" role="group">
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="openEditModal(item)"
+                      title="Edit item"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="deleteItem(item)"
+                      title="Delete item"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (!loading && items.length === 0 && fields.length > 0) {
+    <div class="alert alert-secondary">
+      <i class="fas fa-box-open"></i> No items yet. {{ canEdit ? 'Click "Add Item" to get started!' : '' }}
+    </div>
+  }
+</div>
+
+<!-- Add Item Modal -->
+@if (showAddModal) {
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Item</h5>
+          <button type="button" class="btn-close" (click)="closeAddModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            @for (field of fields; track field.id) {
+              <div class="mb-3">
+                <label class="form-label">{{ field.name }}</label>
+                @if (field.type === 'Text' || field.type === 'Link') {
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="newItemValues[field.id]"
+                    [name]="'field_' + field.id"
+                  >
+                } @else if (field.type === 'MultilineText') {
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    [(ngModel)]="newItemValues[field.id]"
+                    [name]="'field_' + field.id"
+                  ></textarea>
+                } @else if (field.type === 'Number') {
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="newItemValues[field.id]"
+                    [name]="'field_' + field.id"
+                  >
+                } @else if (field.type === 'Boolean') {
+                  <div class="form-check">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [(ngModel)]="newItemValues[field.id]"
+                      [name]="'field_' + field.id"
+                    >
+                    <label class="form-check-label">Yes</label>
+                  </div>
+                }
+              </div>
+            }
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAddModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="addItem()">
+            <i class="fas fa-plus"></i> Add Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Item Modal -->
+@if (showEditModal && editingItem) {
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Item: {{ editingItem.customId }}</h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            @for (field of fields; track field.id) {
+              <div class="mb-3">
+                <label class="form-label">{{ field.name }}</label>
+                @if (field.type === 'Text' || field.type === 'Link') {
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="editItemValues[field.id]"
+                    [name]="'edit_field_' + field.id"
+                  >
+                } @else if (field.type === 'MultilineText') {
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    [(ngModel)]="editItemValues[field.id]"
+                    [name]="'edit_field_' + field.id"
+                  ></textarea>
+                } @else if (field.type === 'Number') {
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="editItemValues[field.id]"
+                    [name]="'edit_field_' + field.id"
+                  >
+                } @else if (field.type === 'Boolean') {
+                  <div class="form-check">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [(ngModel)]="editItemValues[field.id]"
+                      [name]="'edit_field_' + field.id"
+                    >
+                    <label class="form-check-label">Yes</label>
+                  </div>
+                }
+              </div>
+            }
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="updateItem()">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
